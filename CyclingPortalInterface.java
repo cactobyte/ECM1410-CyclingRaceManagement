@@ -12,7 +12,7 @@ import java.time.LocalTime;
  * @version 2.0
  *
  */
-public interface CyclingPortal extends MiniCyclingPortal {
+public interface CyclingPortalInterface extends MiniCyclingPortalInterface {
 
 	/**
 	 * The method removes the race and all its related information, i.e., stages,
