@@ -2,6 +2,6 @@ package cycling;
 
 import java.time.LocalTime;
 
-public interface CyclingPortal extends MiniCyclingPortal {
+public interface CyclingPortal implements CyclingPortalInterface {
 	
 }
