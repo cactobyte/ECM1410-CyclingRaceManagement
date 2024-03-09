@@ -4,6 +4,13 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
+
+/**
+ * Cycling portal implementation
+ * 
+ * @author Finlay Fordham, Boris Cheung
+ */
 
 public class CyclingPortal implements CyclingPortalInterface {
 	// global hashmaps
@@ -52,7 +59,7 @@ public class CyclingPortal implements CyclingPortalInterface {
 	public void removeTeam(int teamID) throws IDNotRecognisedException{
 		// IDNotRecognisedException
 		if (!teamHash.contains(teamID)){
-			throw new IDNotRecognisedException("Team ID does not exist")
+			throw new IDNotRecognisedException("Team ID does not exist");
 		}
 
 		// removing from list
@@ -67,4 +74,25 @@ public class CyclingPortal implements CyclingPortalInterface {
 		teamHash.remove(teamID);
 	}
 
+	@Override
+	public int[] getTeams(){
+		Set<Integer> IDSet = teamHash.keySet();
+
+		//converting set to Array
+		int[] teamIDs = new int[IDSet.size()];
+		int i = 0;
+		for (Integer val : IDSet) {
+			teamIDs[i++] = val;
+		}
+
+		return teamIDs;
+	}
+
+	@Override
+	public int createRider(int teamID, String name, int yearOfBirth) throws IDNotRecognisedException, IllegalArgumentException{
+		// construct rider
+		// add rider to rider hashmap and generate rider ID
+		// add rider to rider list
+		// return rider ID
+	}
 }
