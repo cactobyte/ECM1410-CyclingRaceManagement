@@ -41,8 +41,8 @@ public int createRace(String name, String description) throws IllegalNameExcepti
 		// main method logic
 		Race newRace = new Race(name, description);
 		// assigning ID to race, ******NEED EDITING****
-		int raceId = raceHash.size()
-		if (raceId == 0){
+		int numOfRaces = raceHash.size()
+		if (numOfRaces == 0){
 			raceHash.put(0, newRace);
 		} else {
 			raceHash.put(Collections.max(raceHash.keySet()) + 1, newRace);
