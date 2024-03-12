@@ -25,3 +25,13 @@ public int getRaceId() {
 
 	return raceId;
 }
+
+public void removeRaceById(int raceId) throws IDNotRecognisedException{
+// Not sure if containsKey works lol, probably does! haha..
+// no but fr it exists so its ok right??!?!?!?!?!?!?!? why am i talking to myself ;-;
+	if (!raceHash.containsKey(raceId)){
+		throw new IDNotRecognisedException
+	}
+
+	raceHash.remove(raceId);
+}
