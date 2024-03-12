@@ -1,6 +1,3 @@
-// Add to the top 
-private HashMap<Integer, Race> raceHash = new HashMap<Integer, Race>();
-
 /*
 
  /$$$$$$$                      /$$           /$$        /$$$$$$                  /$$          
@@ -16,38 +13,15 @@ private HashMap<Integer, Race> raceHash = new HashMap<Integer, Race>();
 
 */
 
-// Add this in the bottom
-public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
-		// InvalidNameException
-		if (name == null){
-			throw new InvalidNameException("Name is null");
-		} else if (name.isEmpty()){
-			throw new InvalidNameException("Name is empty");
-		} else if (name.length() > 30){
-			throw new InvalidNameException("Name is too long");
-		} else if (name.contains(" ")){
-			throw new InvalidNameException("Name contains whitespace");
-		}
+// New Functions 12/03/24
 
-		// IllegalNameException
-		// looping through all race checking if name exists
-		// id is key, value is race *del*
-		for (String i : raceHash.values()) {
-			if (name == i){
-				throw new IllegalNameException("Race name already exists");
-			}
-		}
+public int getRaceId() {
+	int[] raceId = new int[raceHash.size()];
+	int index = 0;
 
-		// main method logic
-		Race newRace = new Race(name, description);
-		// assigning ID to race, ******NEED EDITING****
-		int numOfRaces = raceHash.size()
-		if (numOfRaces == 0){
-			raceHash.put(0, newRace);
-		} else {
-			raceHash.put(Collections.max(raceHash.keySet()) + 1, newRace);
-		}
+	for (Integer i : raceHash.keySet()) {
+		raceId[index++] = i
+	}
 
-		return Collections.max(teamHash.keySet()); // can this not just be raceId + 1 ??? 
-
+	return raceId;
 }
