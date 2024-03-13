@@ -1,11 +1,11 @@
 package cycling;
 
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 /**
  * Cycling portal implementation
@@ -18,6 +18,8 @@ public class CyclingPortalImpl implements CyclingPortal {
 	private HashMap<Integer, Team> teamHash = new HashMap<Integer, Team>();
 	private HashMap<Integer, Rider> riderHash = new HashMap<Integer, Rider>();
 	private HashMap<Integer, Race> raceHash = new HashMap<Integer, Race>();
+	private HashMap<Integer, Stage> stageHash = new HashMap<Integer, Stage>();
+
 
 	@Override
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
@@ -77,6 +79,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return teamIDs;
 	}
 
+	@Override
 	public int createRider(int teamID, String name, int yearOfBirth) throws IDNotRecognisedException, IllegalArgumentException{
 		// IDNotrecognisedException
 		boolean IDExists = false;
@@ -113,6 +116,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return Collections.max(riderHash.keySet());
 	}
 
+	@Override
 	public void removeRider(int riderID) throws IDNotRecognisedException{
 		// IDNotRecognised
 		if (!riderHash.containsKey(riderID)){
@@ -122,6 +126,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		riderHash.remove(riderID);
 	}
 
+	@Override
 	public int[] getTeamRiders(int teamID) throws IDNotRecognisedException{
 		// IDNotRecognisedException
 		if (!teamHash.containsKey(teamID)){
@@ -144,6 +149,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return IDs;
 	}
 
+	@Override
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
 		// InvalidNameException
 		if (name == null){
@@ -175,7 +181,76 @@ public class CyclingPortalImpl implements CyclingPortal {
 			raceHash.put(Collections.max(raceHash.keySet()) + 1, newRace);
 		}
 
-		return Collections.max(raceHash.keySet()); // can this not just be raceId + 1 ??? 
+		return Collections.max(teamHash.keySet()); // can this not just be raceId + 1 ??? 
+	}
 
+	@Override
+	public int[] getRaceIds() {
+		int[] raceId = new int[raceHash.size()];
+		int index = 0;
+
+		for (Integer i : raceHash.keySet()) {
+			raceId[index++] = i;
+		}
+
+		return raceId;
+	}
+
+	@Override
+	public void removeRaceById(int raceId) throws IDNotRecognisedException{
+		// IDNotRecognised
+		if (!raceHash.containsKey(raceId)){
+			throw new IDNotRecognisedException("Race ID not in system");
+		}
+
+		// method logic
+		raceHash.remove(raceId);
+	}
+
+	@Override
+	public int addStageToRace(int raceId, String stageName, String description,
+		double length, LocalDateTime startTime, StageType type)
+		throws IDNotRecognisedException, IllegalNameException,
+		InvalidNameException, InvalidLengthException{
+
+		// IDNotRecognised
+		if (!raceHash.containsKey(raceId)){
+			throw new IDNotRecognisedException("ID does not match to any race in the system");
+		}
+
+		// IllegalName
+		for (Stage stage : stageHash.values()) {
+			if (stage.getName() == stageName){
+				throw new IllegalNameException("Stage name already exists");
+			}
+		}
+
+		// InvalidName
+		if (stageName == null){
+			throw new InvalidNameException("Stage name is null");
+		} else if (stageName.isEmpty()){
+			throw new InvalidNameException("Stage name is empty");
+		} else if (stageName.length() > 30){
+			throw new InvalidNameException("Stage name is too long");
+		} else if (stageName.contains(" ")){
+			throw new InvalidNameException("Stage name contains whitespace");
+		}
+
+		// InvalidLength
+		if (length < 5) {
+			throw new InvalidLengthException("The length of the stage is too short or null");
+		}
+
+		// method logic
+		Stage newStage = new Stage(raceId, stageName, description, length, startTime, type);
+		int numOfStages = stageHash.size();
+
+		if (numOfStages == 0){
+			stageHash.put(0, newStage);
+		} else {
+			stageHash.put(Collections.max(stageHash.keySet()) + 1, newStage);
+		}
+
+		return Collections.max(stageHash.keySet()); 
 	}
 }
