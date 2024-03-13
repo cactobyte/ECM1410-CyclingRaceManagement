@@ -3,11 +3,11 @@ package cycling;
 import java.time.LocalDateTime;
 
 public class Stage {
-	private int raceID;
+	private int raceId;
 	private String stageName;
 	private String description;
 	private double length;
-	private java.time.LocalDateTime startTime,
+	private LocalDateTime startTime;
 	private StageType type;
 
 	public String getName(){
@@ -15,8 +15,8 @@ public class Stage {
 	}
 
 	//contructor
-	public Stage(int raceID, String stageName, String description, double length, java.time.LocalDateTime startTime, StageType type){
-		this.raceId = raceID;
+	public Stage(int raceId, String stageName, String description, double length, LocalDateTime startTime, StageType type){
+		this.raceId = raceId;
 		this.stageName = stageName;
 		this.description = description;
 		this.length = length;
