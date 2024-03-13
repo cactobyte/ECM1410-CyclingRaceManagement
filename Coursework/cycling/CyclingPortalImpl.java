@@ -175,7 +175,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 			raceHash.put(Collections.max(raceHash.keySet()) + 1, newRace);
 		}
 
-		return Collections.max(teamHash.keySet()); // can this not just be raceId + 1 ??? 
+		return Collections.max(raceHash.keySet()); // can this not just be raceId + 1 ??? 
 
 	}
 }
