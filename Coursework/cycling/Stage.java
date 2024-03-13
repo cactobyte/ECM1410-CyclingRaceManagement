@@ -11,7 +11,7 @@ public class Stage {
 	private StageType type;
 
 	public String getName(){
-		return name;
+		return stageName;
 	}
 
 	//contructor
