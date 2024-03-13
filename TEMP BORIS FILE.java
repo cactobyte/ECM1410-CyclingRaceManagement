@@ -35,3 +35,43 @@ public void removeRaceById(int raceId) throws IDNotRecognisedException{
 
 	raceHash.remove(raceId);
 }
+
+private HashMap<Integer, Stage> stageHash = new HashMap<Integer, Stage>();
+
+public int addStageToRace(int raceId, string stageName, string description, double length, LocalDateTime startTime, StageType type) throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
+	
+	if (!raceHash.containsKey(raceId)){
+		throw new IDNotRecognisedException("ID does not match to any race in the system")
+	}
+
+	for (String name : stageHash.values()) {
+		if (stageName == name){
+			throw new IllegalNameException("Stage name already exists");
+		}
+	}
+
+	if (stageName == null){
+		throw new InvalidNameException("Stage name is null");
+	} else if (stageName.isEmpty()){
+		throw new InvalidNameException("Stage name is empty");
+	} else if (stageName.length() > 30){
+		throw new InvalidNameException("Stage name is too long");
+	} else if (stageName.contains(" ")){
+		throw new InvalidNameException("Stage name contains whitespace");
+	}
+
+
+	if (length < 5 || length == null){
+		throw new InvalidLengthException()
+	}
+
+	Stage newStage = new Stage(raceId, stageName, description, length, startTime, type);
+	int numOfStages = stageHash.size()
+	if (numOfStages == 0){
+		stageHash.put(0, newStage);
+	} else {
+		stageHash.put(Collections.max(stageHash.keySet()) + 1, newStage);
+	}
+
+	return Collections.max(stageHash.keySet()); 
+}
