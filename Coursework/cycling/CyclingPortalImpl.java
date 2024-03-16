@@ -19,7 +19,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 	private HashMap<Integer, Rider> riderHash = new HashMap<Integer, Rider>();
 	private HashMap<Integer, Race> raceHash = new HashMap<Integer, Race>();
 	private HashMap<Integer, Stage> stageHash = new HashMap<Integer, Stage>();
-
+	private HashMap<Integer, Checkpoint> checkpointHash = new HashMap<Integer, Checkpoint>();
 
 	@Override
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
@@ -55,14 +55,21 @@ public class CyclingPortalImpl implements CyclingPortal {
 	}
 
 	@Override
-	public void removeTeam(int teamID) throws IDNotRecognisedException{
+	public void removeTeam(int teamId) throws IDNotRecognisedException{
 		// IDNotRecognisedException
-		if (!teamHash.containsKey(teamID)){
+		if (!teamHash.containsKey(teamId)){
 			throw new IDNotRecognisedException("Team ID does not exist");
 		}
 
+		// removign all the riders associated with Team
+		for (Map.Entry<Integer, Rider> entry : riderHash.entrySet()){
+			if (entry.getValue().getTeamID() == teamId){
+				riderHash.remove(entry.getKey());
+			}			
+		}
+
 		// removing from hashmap
-		teamHash.remove(teamID);
+		teamHash.remove(teamId);
 	}
 
 	@Override
@@ -117,19 +124,19 @@ public class CyclingPortalImpl implements CyclingPortal {
 	}
 
 	@Override
-	public void removeRider(int riderID) throws IDNotRecognisedException{
+	public void removeRider(int riderId) throws IDNotRecognisedException{
 		// IDNotRecognised
-		if (!riderHash.containsKey(riderID)){
-			throw new IDNotRecognisedException("RiderID does not exist");
+		if (!riderHash.containsKey(riderId)){
+			throw new IDNotRecognisedException("riderId does not exist");
 		}
 
-		riderHash.remove(riderID);
+		riderHash.remove(riderId);
 	}
 
 	@Override
-	public int[] getTeamRiders(int teamID) throws IDNotRecognisedException{
+	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException{
 		// IDNotRecognisedException
-		if (!teamHash.containsKey(teamID)){
+		if (!teamHash.containsKey(teamId)){
 			throw new IDNotRecognisedException("Team ID does not exist");
 		}
 
@@ -137,7 +144,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		// loop through all riders finding Team IDS that match
 		for (Map.Entry<Integer, Rider> entry : riderHash.entrySet()){
-			if (entry.getValue().getTeamID() == teamID){
+			if (entry.getValue().getTeamID() == teamId){
 				riderList.add(entry.getKey());
 			}			
 		}
@@ -253,4 +260,139 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		return Collections.max(stageHash.keySet()); 
 	}
+
+	@Override
+	public int[] getRaceStages(int raceId) throws IDNotRecognisedException{
+		// IDNotRecognisedException
+		if (!raceHash.containsKey(raceId)){
+			throw new IDNotRecognisedException("Race ID not in system");
+		}
+
+		// Put all stages from the race in a list
+		ArrayList<Stage> stageList = new ArrayList<Stage>();
+		for (Stage stage : stageHash.values()){
+			if (stage.getRaceId() == raceId){
+				stageList.add(stage);
+			}
+		}
+
+		// bubblesort list based on startTime
+		boolean swapFlag = true;
+		for (int i = 1; i < stageList.size(); i++){
+			// stopping sort if no swaps made last pass
+			if (swapFlag){
+				break;
+			}
+
+			// resseting flag
+			swapFlag = false;
+
+			// bubble sort pass
+			for (int j = 0; j < stageList.size() - i; j++){
+				// comparing times of current item and item ahead
+				if (stageList.get(j).getStartTime().isAfter(stageList.get(j + 1).getStartTime())){
+					// swapping items
+					Stage temp = stageList.get(j + 1);
+					stageList.set(j + 1, stageList.get(j));
+					stageList.set(j, temp);
+
+					swapFlag = true;
+				}
+			}
+		}
+
+		// return the IDs
+		int[] Ids = new int[stageList.size()];
+		// loop through all items in the list
+		for (int i = 0; i < stageList.size(); i++){
+			// looping hasmap finding current stage
+			for (Map.Entry<Integer, Stage> entry : stageHash.entrySet()){
+				if (entry.getValue() == stageList.get(i)){
+					Ids[i] = entry.getKey();
+				}
+			}
+		}
+
+		return Ids;
+	}
+
+	@Override
+	public double getStageLength(int stageId) throws IDNotRecognisedException{
+		// IDNotRecognised
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("Stage ID not in system");
+		}
+		
+		// method logic
+		return stageHash.get(stageId).getLength();
+	}
+
+	@Override
+	public int getNumberOfStages(int raceId) throws IDNotRecognisedException{
+		// IDNotRecognised
+		if (!raceHash.containsKey(raceId)){
+			throw new IDNotRecognisedException("race ID not in system");
+		}
+
+		// method logic
+		int count = 0;
+
+		// loop through all stages finding matching raceIds
+		for (Stage stage : stageHash.values()){
+			if (stage.getRaceId() == raceId){
+				count++;
+			}
+		}
+
+		return count;
+	}
+
+	@Override
+	public void removeStageById(int stageId) throws IDNotRecognisedException{
+		// IDNotRecognised
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("stage ID not in system");
+		}
+
+		// remove stage
+		stageHash.remove(stageId);
+	}
+
+	@Override
+	public int addCategorizedClimbToStage(int stageId, Double location, CheckpointType type,
+		Double averageGradient, Double length) throws IDNotRecognisedException, InvalidLocationException,
+		InvalidStageStateException, InvalidStageTypeException{
+
+		// IDNotRecognised
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("stage ID does not exist");
+		}
+
+		// InvalidLocation
+		if (stageHash.get(stageId).getLength() < length){
+			throw new InvalidLengthException("The checkpoint is not within the stage bounds");
+		}
+
+		// InvalidStageState
+		// TODO
+
+		// InvalidStageType
+		if (stageHash.get(stageId).getType() == StageType.TT){
+			throw new InvalidStageTypeException("Cannot add a checkpoint to a time trial stage");
+		}
+
+		// method logic
+		// initialise checkpoint object
+		Checkpoint newCheckpoint = new Checkpoint(stageId, location, type, averageGradient, length);
+
+		// add checkpoint to hashmap
+		if (checkpointHash.size() == 0){
+			checkpointHash.put(0, newCheckpoint);
+		} else {
+			checkpointHash.put(Collections.max(checkpointHash.keySet()) + 1, newCheckpoint);
+		}
+
+		// return Id
+		return Collections.max(checkpointHash.keySet());
+		}
 }
