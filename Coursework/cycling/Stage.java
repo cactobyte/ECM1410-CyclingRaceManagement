@@ -10,8 +10,24 @@ public class Stage {
 	private LocalDateTime startTime;
 	private StageType type;
 
+	public LocalDateTime getStartTime(){
+		return startTime;
+	}
+
+	public int getRaceId(){
+		return raceId;
+	}
+
 	public String getName(){
 		return stageName;
+	}
+
+	public double getLength(){
+		return length;
+	}
+
+	public StageType getType(){
+		return type;
 	}
 
 	//contructor
