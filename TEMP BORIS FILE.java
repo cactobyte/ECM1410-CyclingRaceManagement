@@ -13,65 +13,18 @@
 
 */
 
-// New Functions 12/03/24
+// For Testing
 
-public int getRaceId() {
-	int[] raceId = new int[raceHash.size()];
-	int index = 0;
-
-	for (Integer i : raceHash.keySet()) {
-		raceId[index++] = i
-	}
-
-	return raceId;
+try{
+	teams = portal1.getTeams() // Gets Team ID's from portal1
+	rider = portal1.createRider(teams[0], "Bob Smith", 2000) // Created Rider, returns rider id
+} catch (IDNotRecognisedException e) {
+	e.printStackTrace();
+} catch (IllegalArgumentException e) {
+	e.printStackTrace();
 }
+// TODO: Check if rider id matches rider id from team?
 
-public void removeRaceById(int raceId) throws IDNotRecognisedException{
-// Not sure if containsKey works lol, probably does! haha..
-// no but fr it exists so its ok right??!?!?!?!?!?!?!? why am i talking to myself ;-;
-	if (!raceHash.containsKey(raceId)){
-		throw new IDNotRecognisedException
-	}
+assert(portal1.removeRider(rider)) : "ID could not be removed"
+		
 
-	raceHash.remove(raceId);
-}
-
-private HashMap<Integer, Stage> stageHash = new HashMap<Integer, Stage>();
-
-public int addStageToRace(int raceId, string stageName, string description, double length, LocalDateTime startTime, StageType type) throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
-	
-	if (!raceHash.containsKey(raceId)){
-		throw new IDNotRecognisedException("ID does not match to any race in the system")
-	}
-
-	for (String name : stageHash.values()) {
-		if (stageName == name){
-			throw new IllegalNameException("Stage name already exists");
-		}
-	}
-
-	if (stageName == null){
-		throw new InvalidNameException("Stage name is null");
-	} else if (stageName.isEmpty()){
-		throw new InvalidNameException("Stage name is empty");
-	} else if (stageName.length() > 30){
-		throw new InvalidNameException("Stage name is too long");
-	} else if (stageName.contains(" ")){
-		throw new InvalidNameException("Stage name contains whitespace");
-	}
-
-
-	if (length < 5 || length == null){
-		throw new InvalidLengthException()
-	}
-
-	Stage newStage = new Stage(raceId, stageName, description, length, startTime, type);
-	int numOfStages = stageHash.size()
-	if (numOfStages == 0){
-		stageHash.put(0, newStage);
-	} else {
-		stageHash.put(Collections.max(stageHash.keySet()) + 1, newStage);
-	}
-
-	return Collections.max(stageHash.keySet()); 
-}
