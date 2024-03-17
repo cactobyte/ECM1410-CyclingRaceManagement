@@ -8,11 +8,24 @@ public class Checkpoint{
 	private Double averageGradient;
 	private Double length;
 
-	// constructor
-	public Checkpoint(int stageId, Double location, CheckpointType type, Double averageGradient, Double length){
+	// getters and setters
+	public int getStageId(){
+		return stageId;
+	}
+
+	public Double getLocation(){
+		return location;
+	}
+
+	// constructors
+	public Checkpoint(int stageId, Double location, CheckpointType type){
 		this.stageId = stageId;
 		this.location = location;
 		this.type = type;
+	}
+
+	public Checkpoint(int stageId, Double location, CheckpointType type, Double averageGradient, Double length){
+		this(stageId, location, type);
 		this.averageGradient = averageGradient;
 		this.length = length;
 	}
