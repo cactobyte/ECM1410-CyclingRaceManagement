@@ -9,6 +9,10 @@ public class Race {
 		return name;
 	}
 
+	public String getDescription(){
+		return description;
+	}
+
 	//contructor
 	public Race(String name, String description){
 		this.name = name;
