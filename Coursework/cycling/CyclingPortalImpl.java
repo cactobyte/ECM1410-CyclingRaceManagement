@@ -360,8 +360,8 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 	@Override
 	public int addCategorizedClimbToStage(int stageId, Double location, CheckpointType type,
-		Double averageGradient, Double length) throws IDNotRecognisedException, InvalidLocationException,
-		InvalidStageStateException, InvalidStageTypeException{
+	Double averageGradient, Double length) throws IDNotRecognisedException,
+	InvalidLocationException, InvalidStageStateException, InvalidStageTypeException{
 
 		// IDNotRecognised
 		if (!stageHash.containsKey(stageId)){
@@ -369,12 +369,14 @@ public class CyclingPortalImpl implements CyclingPortal {
 		}
 
 		// InvalidLocation
-		if (stageHash.get(stageId).getLength() < length){
+		if (stageHash.get(stageId).getLength() < location){
 			throw new InvalidLengthException("The checkpoint is not within the stage bounds");
 		}
 
 		// InvalidStageState
-		// TODO
+		if (stageHash.get(stageId).getStageState() == "waiting for results"){
+			throw new InvalidStageStateException("Can't add checkpoint, stage has concluded");
+		}
 
 		// InvalidStageType
 		if (stageHash.get(stageId).getType() == StageType.TT){
@@ -394,5 +396,162 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		// return Id
 		return Collections.max(checkpointHash.keySet());
+	}
+
+	@Override
+	public int addIntermediateSprintToStage(int stageId, double location)
+	throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
+	InvalidStageTypeException{
+
+		// IDNotRecognised
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("stage ID does not exist");
 		}
+
+		// InvalidLocation
+		if (stageHash.get(stageId).getLength() < location){
+			throw new InvalidLengthException("The checkpoint is not within the stage bounds");
+		}
+
+		// InvalidStageState
+		if (stageHash.get(stageId).getStageState() == "waiting for results"){
+			throw new InvalidStageStateException("Can't add checkpoint, stage has concluded");
+		}
+
+		// InvalidStageType
+		if (stageHash.get(stageId).getType() == StageType.TT){
+			throw new InvalidStageTypeException("Cannot add a checkpoint to a time trial stage");
+		}
+
+		// method logic
+		// initialise checkpoint object
+		Checkpoint newCheckpoint = new Checkpoint(stageId, location, CheckpointType.SPRINT);
+
+		// add checkpoint to hashmap
+		if (checkpointHash.size() == 0){
+			checkpointHash.put(0, newCheckpoint);
+		} else {
+			checkpointHash.put(Collections.max(checkpointHash.keySet()) + 1, newCheckpoint);
+		}
+
+		// return Id
+		return Collections.max(checkpointHash.keySet());
+	}
+
+	@Override
+	public void removeCheckpoint(int checkpointId)
+	throws IDNotRecognisedException, InvalidStageStateException{
+
+		// IDNotRecognised
+		if (!checkpointHash.containsKey(checkpointId)){
+			throw new IDNotRecognisedException("checkpoint ID not in system");
+		}
+
+		// InvalidStageState
+		int stageId = checkpointHash.get(checkpointId).getStageId();
+		if (stageHash.get(stageId).getStageState() == "waiting for results"){
+			throw new InvalidStageStateException("Can't remove checkpoint, stage has concluded");
+		}
+
+		// remove checkpoint
+		checkpointHash.remove(checkpointId);
+	}
+
+	@Override
+	public void concludeStagePreparation(int stageId)
+	throws IDNotRecognisedException, InvalidStageStateException{
+
+		// IDNotRecognised
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("stage ID not in system");
+		}
+
+		// InvalidStageState
+		if (stageHash.get(stageId).getStageState() == "waiting for results"){
+			throw new InvalidStageStateException("Can't conclude stage, stage already concluded");
+		}
+
+		// method logic
+		stageHash.get(stageId).concludeStage();
+	}
+
+	@Override
+	public int[] getStageCheckpoints(int stageId) throws IDNotRecognisedException{
+		// IDNotRecognisedException
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("stage ID not in system");
+		}
+
+		// Put all stages from the race in a list
+		ArrayList<Checkpoint> checkpointList = new ArrayList<Checkpoint>();
+		for (Checkpoint checkpoint : checkpointHash.values()){
+			if (checkpoint.getStageId() == stageId){
+				checkpointList.add(checkpoint);
+			}
+		}
+
+		// bubblesort list based on location
+		boolean swapFlag = true;
+		for (int i = 1; i < checkpointList.size(); i++){
+			// stopping sort if no swaps made last pass
+			if (swapFlag){
+				break;
+			}
+
+			// resseting flag
+			swapFlag = false;
+
+			// bubble sort pass
+			for (int j = 0; j < checkpointList.size() - i; j++){
+				// comparing times of current item and item ahead
+				if (checkpointList.get(j).getLocation() > checkpointList.get(j + 1).getLocation()){
+					// swapping items
+					Checkpoint temp = checkpointList.get(j + 1);
+					checkpointList.set(j + 1, checkpointList.get(j));
+					checkpointList.set(j, temp);
+
+					swapFlag = true;
+				}
+			}
+		}
+
+		// return the IDs
+		int[] Ids = new int[checkpointList.size()];
+		// loop through all items in the list
+		for (int i = 0; i < checkpointList.size(); i++){
+			// looping hasmap finding current stage
+			for (Map.Entry<Integer, Checkpoint> entry : checkpointHash.entrySet()){
+				if (entry.getValue() == checkpointList.get(i)){
+					Ids[i] = entry.getKey();
+				}
+			}
+		}
+
+		return Ids;
+	}
+
+	@Override
+	public String viewRaceDetails(int raceId) throws IDNotRecognisedException{
+		// IDNotRecognised
+		if (!raceHash.containsKey(raceId)){
+			throw new IDNotRecognisedException("race ID not in system");
+		}
+
+		// method logic
+		// calculating total length
+		int total = 0;
+		for (Map.Entry<Integer, Stage> entry : stageHash.entrySet()){
+			if (entry.getValue().getRaceId() == raceId){
+				total += entry.getValue().getLength();
+			}
+		}
+
+		String output = "RACE INFO: Race ID = " + String.valueOf(raceId) + ", ";
+		output += "Race Name = " + raceHash.get(raceId).getName() + ", ";
+		output += "Race Description = " + raceHash.get(raceId).getDescription() + ", ";
+		output += "Number of stages = " + String.valueOf(getNumberOfStages(raceId)) + ", ";
+		output += "Total length = " + String.valueOf(total) + ".";
+
+		return output;
+	}
 }
