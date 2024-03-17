@@ -9,6 +9,15 @@ public class Stage {
 	private double length;
 	private LocalDateTime startTime;
 	private StageType type;
+	private String stageState = null;
+
+	public String getStageState(){
+		return stageState;
+	}
+
+	public void concludeStage(){
+		stageState = "waiting for results";
+	}
 
 	public LocalDateTime getStartTime(){
 		return startTime;
