@@ -35,5 +35,8 @@ public class Rider{
         		return null;
     		}
 	}
+	public void deleteStageResults(int stageId) {
+       		stageResults.remove(stageId);
+    	}
 	
 }
