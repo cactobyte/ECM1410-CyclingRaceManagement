@@ -29,6 +29,11 @@ public class Rider{
 	}
 
 	public LocalTime[] getStageResult(int stageId){
-		return stageResults.get(stageId);
+		if (stageResults.containsKey(stageId)) {
+        		return stageResults.get(stageId);
+    		} else {
+        		return null;
+    		}
 	}
+	
 }
