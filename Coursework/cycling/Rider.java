@@ -1,10 +1,15 @@
 package cycling;
 
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Rider{
 	// attributes
 	private int teamID;
 	private String name;
 	private int yearOfBirth;
+	private Map<Integer, LocalTime[]> stageResults;
 
 	// setters and getters
 	public int getTeamID(){
@@ -16,5 +21,14 @@ public class Rider{
 		this.teamID = teamID;
 		this.name = name;
 		this.yearOfBirth = yearOfBirth;
+		this.stageResults = new HashMap<>();
+	}
+
+	public void addStageResult(int stageId, LocalTime[] checkpointTimes) {
+		stageResults.put(stageId, checkpointTimes);
+	}
+
+	public LocalTime[] getStageResult(int stageId){
+		return stageResults.get(stageId);
 	}
 }
