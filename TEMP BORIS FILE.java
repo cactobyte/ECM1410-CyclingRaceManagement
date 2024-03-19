@@ -13,7 +13,9 @@
 
 */
 
-// bruh im not cooking here
+
+// i already updated rider.java, check there for some of the new stuff :)
+
 @Override 														// Idk what these three dots are but its in all the documentations???? IDK
 public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpointTimes) 
 throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointTimesException, InvalidStageStateException {
@@ -43,6 +45,35 @@ throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointTim
 	} else {
 		rider.addStageResult(stageId, checkpointTimes);
 	}
-
-
 }
+
+
+@Override
+public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
+	if (!riderHash.containsKey(riderId)){
+		throw new IDNotRecognisedException("Rider ID not in system");
+	}
+	if (!stageHash.containsKey(stageId)){
+		throw new IDNotRecognisedException("Stage ID not in system");
+	}
+
+	Rider rider = riderHash.get(riderId);
+	LocalTime[] stageResults = rider.getStageResult(stageId);
+	return stageResults;
+}
+
+@Override
+public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException{
+	if (!riderHash.containsKey(riderId)){
+		throw new IDNotRecognisedException("Rider ID not in system");
+	}
+	if (!stageHash.containsKey(stageId)){
+		throw new IDNotRecognisedException("Stage ID not in system");
+	}
+	
+	Rider rider = riderHash.get(riderId);
+	rider.deleteStageResults(stageId);
+}
+
+
+
