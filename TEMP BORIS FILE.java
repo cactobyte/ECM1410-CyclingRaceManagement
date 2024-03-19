@@ -40,8 +40,9 @@ throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointTim
 	Rider rider = riderHash.get(riderId);
 	if (rider.addStageResult().containsKey(stageId)){
 		throw new DuplicatedResultException("Rider already has a result for this stage");
+	} else {
+		rider.addStageResult(stageId, checkpointTimes);
 	}
-	rider.addStageResult(stageId, checkpointTimes);
-	
+
 
 }
