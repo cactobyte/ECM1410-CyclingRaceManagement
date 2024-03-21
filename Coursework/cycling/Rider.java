@@ -16,12 +16,19 @@ public class Rider{
 		return teamID;
 	}
 
-	// constructor
-	public Rider(int teamID, String name, int yearOfBirth){
-		this.teamID = teamID;
-		this.name = name;
-		this.yearOfBirth = yearOfBirth;
-		this.stageResults = new HashMap<>();
+	// Other
+	public LocalTime getFinalStageTime(int stageId){
+		LocalTime[] checkpointTimes = stageResults.get(stageId);
+		LocalTime finalTime = checkpointTimes[checkpointTimes.length - 1];
+		return finalTime;
+	}
+
+	public boolean hasResults(int stageId){
+		if (stageResults.containsKey(stageId)){
+			return true;
+		} else{
+			return false;
+		}
 	}
 
 	public void addStageResult(int stageId, LocalTime[] checkpointTimes) {
@@ -35,8 +42,16 @@ public class Rider{
         		return null;
     		}
 	}
+
 	public void deleteStageResults(int stageId) {
-       		stageResults.remove(stageId);
-    	}
+       	stageResults.remove(stageId);
+    }
 	
+	// constructor
+	public Rider(int teamID, String name, int yearOfBirth){
+		this.teamID = teamID;
+		this.name = name;
+		this.yearOfBirth = yearOfBirth;
+		this.stageResults = new HashMap<>();
+	}
 }
