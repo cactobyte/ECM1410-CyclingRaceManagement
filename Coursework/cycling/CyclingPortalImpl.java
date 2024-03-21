@@ -6,6 +6,11 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.Map;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.io.IOException;
+import java.time.temporal.ChronoUnit;
+
+
 
 /**
  * Cycling portal implementation
@@ -89,16 +94,8 @@ public class CyclingPortalImpl implements CyclingPortal {
 	@Override
 	public int createRider(int teamID, String name, int yearOfBirth) throws IDNotRecognisedException, IllegalArgumentException{
 		// IDNotrecognisedException
-		boolean IDExists = false;
-
-		for (int key : riderHash.keySet()){
-			if (key == teamID){
-				IDExists = true;
-			}
-		}
-
-		if (!IDExists){
-			throw new IDNotRecognisedException("teamID doesn't exist");
+		if (!teamHash.containsKey(teamID)){
+			throw new IDNotRecognisedException("teamId does not exist");
 		}
 
 		// IllegalArgumentException
@@ -188,7 +185,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 			raceHash.put(Collections.max(raceHash.keySet()) + 1, newRace);
 		}
 
-		return Collections.max(teamHash.keySet()); // can this not just be raceId + 1 ??? 
+		return Collections.max(raceHash.keySet());
 	}
 
 	@Override
@@ -370,7 +367,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		// InvalidLocation
 		if (stageHash.get(stageId).getLength() < location){
-			throw new InvalidLengthException("The checkpoint is not within the stage bounds");
+			throw new InvalidLocationException("The checkpoint is not within the stage bounds");
 		}
 
 		// InvalidStageState
@@ -410,7 +407,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		// InvalidLocation
 		if (stageHash.get(stageId).getLength() < location){
-			throw new InvalidLengthException("The checkpoint is not within the stage bounds");
+			throw new InvalidLocationException("The checkpoint is not within the stage bounds");
 		}
 
 		// InvalidStageState
@@ -492,28 +489,29 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		// bubblesort list based on location
 		boolean swapFlag = true;
-		for (int i = 1; i < checkpointList.size(); i++){
-			// stopping sort if no swaps made last pass
-			if (swapFlag){
-				break;
-			}
+		outside:
+			for (int i = 1; i < checkpointList.size(); i++){
+				// stopping sort if no swaps made last pass
+				if (!swapFlag){
+					break outside;
+				}
 
-			// resseting flag
-			swapFlag = false;
+				// resseting flag
+				swapFlag = false;
 
-			// bubble sort pass
-			for (int j = 0; j < checkpointList.size() - i; j++){
-				// comparing times of current item and item ahead
-				if (checkpointList.get(j).getLocation() > checkpointList.get(j + 1).getLocation()){
-					// swapping items
-					Checkpoint temp = checkpointList.get(j + 1);
-					checkpointList.set(j + 1, checkpointList.get(j));
-					checkpointList.set(j, temp);
+				// bubble sort pass
+				for (int j = 0; j < checkpointList.size() - i; j++){
+					// comparing times of current item and item ahead
+					if (checkpointList.get(j).getLocation() > checkpointList.get(j + 1).getLocation()){
+						// swapping items
+						Checkpoint temp = checkpointList.get(j + 1);
+						checkpointList.set(j + 1, checkpointList.get(j));
+						checkpointList.set(j, temp);
 
-					swapFlag = true;
+						swapFlag = true;
+					}
 				}
 			}
-		}
 
 		// return the IDs
 		int[] Ids = new int[checkpointList.size()];
@@ -539,7 +537,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		// method logic
 		// calculating total length
-		int total = 0;
+		double total = 0;
 		for (Map.Entry<Integer, Stage> entry : stageHash.entrySet()){
 			if (entry.getValue().getRaceId() == raceId){
 				total += entry.getValue().getLength();
@@ -550,8 +548,250 @@ public class CyclingPortalImpl implements CyclingPortal {
 		output += "Race Name = " + raceHash.get(raceId).getName() + ", ";
 		output += "Race Description = " + raceHash.get(raceId).getDescription() + ", ";
 		output += "Number of stages = " + String.valueOf(getNumberOfStages(raceId)) + ", ";
-		output += "Total length = " + String.valueOf(total) + ".";
+		output += "Total length = " + String.valueOf(total);
 
 		return output;
+	}
+
+	@Override
+	public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints)
+		throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointTimesException, InvalidStageStateException {
+		
+		// IDNotRecognised 
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("Stage ID not in system");
+		}
+		if (!riderHash.containsKey(riderId)){
+			throw new IDNotRecognisedException("Rider ID not in system");
+		}
+
+		// InvalidstageState
+		Stage stage = stageHash.get(stageId);
+		if (stageHash.get(stageId).getStageState() != "waiting for results"){
+			throw new InvalidStageStateException("Stage is not at the correct state"); // Sounds dodgy, change in future
+		}
+
+		// InvalidCheckpointTimes
+		// finding how many checkpoints are in the stage
+		int numberOfCheckpoints = 0;
+		for(Map.Entry<Integer, Checkpoint> entry : checkpointHash.entrySet()){
+			if (entry.getValue().getStageId() == stageId){
+				numberOfCheckpoints++;
+			}
+		}
+		// checking if right number of results were input
+		if (checkpoints.length != (numberOfCheckpoints + 2)){
+			throw new InvalidCheckpointTimesException("Wrong number of results input");
+		}
+
+		// DuplicatedResult Exception
+		Rider rider = riderHash.get(riderId);
+		if (!rider.hasResults(stageId)){
+			throw new DuplicatedResultException("Rider already has a result for this stage");
+		}
+		
+		// Method logic
+		rider.addStageResult(stageId, checkpoints);
+	}
+
+	@Override
+	public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
+		// IDNotRecognised
+		if (!riderHash.containsKey(riderId)){
+			throw new IDNotRecognisedException("Rider ID not in system");
+		}
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("Stage ID not in system");
+		}
+
+		// method logic
+		Rider rider = riderHash.get(riderId);
+		LocalTime[] stageResults = rider.getStageResult(stageId);
+		return stageResults;
+	}
+
+	@Override
+	public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
+		// IDNotRecognisedException
+		if (!riderHash.containsKey(riderId)){
+			throw new IDNotRecognisedException("Rider ID not in system");
+		}
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("Stage ID not in system");
+		}
+		
+		// method logic
+		Rider rider = riderHash.get(riderId);
+		rider.deleteStageResults(stageId);
+
+	}
+
+	@Override
+	public void removeRaceByName(String name) throws NameNotRecognisedException {
+		// NameNotRecognised
+		boolean nameExists = false;
+		int raceId = 0;
+		for (Map.Entry<Integer, Race> entry : raceHash.entrySet()){
+			if (entry.getValue().getName() == name){
+				nameExists = true;
+				raceId = entry.getKey();
+			}
+		}
+		if (!nameExists){
+			throw new NameNotRecognisedException("Race Name not in system");
+		}
+
+		// method logic
+		raceHash.remove(raceId);
+	}
+
+	@Override
+	public LocalTime getRiderAdjustedElapsedTimeInStage(int stageId, int riderId) throws IDNotRecognisedException {
+		// IDNotRecognised
+		if (!stageHash.containsKey(stageId)){
+			throw new IDNotRecognisedException("StageId doesn't exist");
+		}
+		if (!riderHash.containsKey(riderId)){
+			throw new IDNotRecognisedException("RiderId doesn't exist");
+		}
+
+		// get all riders in a stage
+		ArrayList<Rider> riderList = new ArrayList<Rider>();
+		for (Map.Entry<Integer, Rider> entry : riderHash.entrySet()){
+			if (entry.getValue().hasResults(stageId)){
+				riderList.add(entry.getValue());
+			}
+		}
+
+		// bubblesort first to last based on thier time
+		boolean swapFlag = true;
+		outside:
+			for (int i = 1; i < riderList.size(); i++){
+				// stopping sort if no swaps made last pass
+				if (!swapFlag){
+					break outside;
+				}
+
+				// resseting flag
+				swapFlag = false;
+
+				// bubble sort pass
+				for (int j = 0; j < riderList.size() - i; j++){
+					// comparing times of current item and item ahead
+					if (riderList.get(j).getFinalStageTime(stageId).isAfter(riderList.get(j + 1).getFinalStageTime(stageId))){
+						// swapping items
+						Rider temp = riderList.get(j + 1);
+						riderList.set(j + 1, riderList.get(j));
+						riderList.set(j, temp);
+
+						swapFlag = true;
+					}
+				}
+			}
+
+
+		// calculate specific adjusted time for rider requested
+		// finding the specific rider
+		int riderIndex = 0;
+		Rider rider = riderHash.get(riderId);
+		for (int i = 0; i < riderList.size(); i++){
+			if (riderList.get(i) == rider){
+				riderIndex = i;
+			}
+		}
+
+		// checking if rider ahead has time within one second
+		LocalTime currentTime = riderHash.get(riderId).getFinalStageTime(stageId);
+		withinOne:
+			for(int i = riderIndex; i < 1; i--){
+				LocalTime timeOne = riderList.get(i).getFinalStageTime(stageId);
+				LocalTime timeTwo = riderList.get(i - 1).getFinalStageTime(stageId);
+				long difference = ChronoUnit.SECONDS.between(timeOne, timeTwo);
+				if (difference < 1){
+					currentTime = timeTwo;
+				} else{
+					break withinOne;
+				}
+			}
+
+		return currentTime;
+	}
+
+	@Override
+	public int[] getRidersRankInStage(int stageId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void eraseCyclingPortal() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void saveCyclingPortal(String filename) throws IOException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public LocalTime[] getGeneralClassificationTimesInRace(int raceId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] getRidersPointsInRace(int raceId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] getRidersMountainPointsInRace(int raceId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] getRidersGeneralClassificationRank(int raceId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] getRidersPointClassificationRank(int raceId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] getRidersMountainPointClassificationRank(int raceId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
