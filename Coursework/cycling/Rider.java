@@ -10,13 +10,23 @@ public class Rider{
 	private String name;
 	private int yearOfBirth;
 	private Map<Integer, LocalTime[]> stageResults;
+	private Map<Integer, Integer> sprintPoints;
 
-	// setters and getters
+	// getters
 	public int getTeamID(){
 		return teamID;
 	}
 
 	// Other
+	public void addSprintPoints(int stageId, int points){
+		sprintPoints.put(stageId, points + sprintPoints.get(stageId));
+	}
+
+	public LocalTime getCheckpointTime(int stageId, int index){
+		LocalTime[] results = stageResults.get(stageId);
+		return results[index];
+	}
+
 	public LocalTime getFinalStageTime(int stageId){
 		LocalTime[] checkpointTimes = stageResults.get(stageId);
 		LocalTime finalTime = checkpointTimes[checkpointTimes.length - 1];
