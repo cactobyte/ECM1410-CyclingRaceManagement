@@ -17,6 +17,10 @@ public class Checkpoint{
 		return location;
 	}
 
+	public CheckpointType getType() {
+        	return type;
+    	}
+
 	// constructors
 	public Checkpoint(int stageId, Double location, CheckpointType type){
 		this.stageId = stageId;
