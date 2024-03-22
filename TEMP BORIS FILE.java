@@ -13,6 +13,31 @@
 
 */
 
+@Override
+public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
+	if (!stageHash.containsKey(stageId)){
+		throw new IDNotRecognisedException("Stage ID not in system");
+	}
+
+	ArrayList<Checkpoint> checkpoints = new ArrayList<>(); // Gets all checkpoints in that stage
+    for (Checkpoint checkpoint : checkpointHash.values()) {
+	if (checkpoint.getStageId() == stageId) {
+	    checkpoints.add(checkpoint); // Could be condensed to also check if type is sprint but i feel like its better to seperate it
+	}
+    }
+
+    // Find categorized climb checkpoints
+    for (Checkpoint checkpoint : checkpoints){
+	if (checkpoint.getType() != CheckpointType.SPRINT){
+		// Then that checkpoint is a climb
+		// Calculate points
+	}
+    }
+
+	return null;
+}
+
+
 
 // i already updated rider.java, check there for some of the new stuff :)
 
