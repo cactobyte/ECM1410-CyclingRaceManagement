@@ -39,66 +39,38 @@ public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedE
 
 
 
-// i already updated rider.java, check there for some of the new stuff :)
-
-@Override 														// Idk what these three dots are but its in all the documentations???? IDK
-public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpointTimes) 
-throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointTimesException, InvalidStageStateException {
-	if (!stageHash.containsKey(stageId)){
-		throw new IDNotRecognisedException("Stage ID not in system");
-	}
-	if (!riderHash.containsKey(riderId)){
-		throw new IDNotRecognisedException("Rider ID not in system");
-	}
-
-	Stage stage = stageHash.get(stageId);
-	if (stageHash.get(stageId).getStageState() != "waiting for results"){
-		throw new InvalidStageStateException("Stage is not at the correct state"); // Sounds dodgy, change in future
-	}
-
-	// Lowkey need help with this one...
-	/* 
-	@throws InvalidCheckpointTimesException Thrown if the length of checkpointTimes is
- *                                     not equal to n+2, where n is the number
- *                                     of checkpoints in the stage; +2 represents
- *                                     the start time and the finish time of the
-	*/
-
-	Rider rider = riderHash.get(riderId);
-	if (rider.addStageResult().containsKey(stageId)){
-		throw new DuplicatedResultException("Rider already has a result for this stage");
-	} else {
-		rider.addStageResult(stageId, checkpointTimes);
-	}
-}
-
-
 @Override
-public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
-	if (!riderHash.containsKey(riderId)){
-		throw new IDNotRecognisedException("Rider ID not in system");
-	}
+public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
 	if (!stageHash.containsKey(stageId)){
 		throw new IDNotRecognisedException("Stage ID not in system");
 	}
 
-	Rider rider = riderHash.get(riderId);
-	LocalTime[] stageResults = rider.getStageResult(stageId);
-	return stageResults;
+	ArrayList<Checkpoint> checkpoints = getStageCheckpoints(stageId); // Gets all checkpoints in that stage
+    ArrayList<Rider> riders = getRidersInStage(stageId); // Get Riders in stage
+
+    int[] mountainPoints = new int[riders.size()]; 
+
+    Map<CheckpointType, int[]> pointDistributionMap = new HashMap<>();
+pointDistributionMap.put(CheckpointType.HC, new int[]{50, 30, 20, 15}); // ADD AND FIX
+
+
+    for (int i = 0; i < checkpoints.size(); i++) {
+Checkpoint checkpoint = checkpoints.get(i);
+
+// Check if the checkpoint is a mountain checkpoint
+if (checkpoint.getType() != CheckpointType.SPRINT) {
+    int[] pointDistribution = pointDistributionMap.get(checkpoint.getType());
+
+    // Sort riders based on their checkpoint times
+    
+
+    // Assign points based on rider positions and point distribution
+    // for (int j = 0; j < riders.size(); j++) {
+    //     int points = (j < pointDistribution.length) ? pointDistribution[j] : 0;
+    //     mountainPoints[j] += points;
+    // }
 }
 
-@Override
-public void deleteRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException{
-	if (!riderHash.containsKey(riderId)){
-		throw new IDNotRecognisedException("Rider ID not in system");
-	}
-	if (!stageHash.containsKey(stageId)){
-		throw new IDNotRecognisedException("Stage ID not in system");
-	}
-	
-	Rider rider = riderHash.get(riderId);
-	rider.deleteStageResults(stageId);
+
+return mountainPoints;
 }
-
-
-
