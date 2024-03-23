@@ -19,58 +19,83 @@ public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedE
 		throw new IDNotRecognisedException("Stage ID not in system");
 	}
 
-	ArrayList<Checkpoint> checkpoints = new ArrayList<>(); // Gets all checkpoints in that stage
-    for (Checkpoint checkpoint : checkpointHash.values()) {
-	if (checkpoint.getStageId() == stageId) {
-	    checkpoints.add(checkpoint); // Could be condensed to also check if type is sprint but i feel like its better to seperate it
-	}
-    }
-
-    // Find categorized climb checkpoints
-    for (Checkpoint checkpoint : checkpoints){
-	if (checkpoint.getType() != CheckpointType.SPRINT){
-		// Then that checkpoint is a climb
-		// Calculate points
-	}
-    }
-
-	return null;
-}
-
-
-
-@Override
-public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
-	if (!stageHash.containsKey(stageId)){
-		throw new IDNotRecognisedException("Stage ID not in system");
-	}
-
 	ArrayList<Checkpoint> checkpoints = getStageCheckpoints(stageId); // Gets all checkpoints in that stage
-    ArrayList<Rider> riders = getRidersInStage(stageId); // Get Riders in stage
-
-    int[] mountainPoints = new int[riders.size()]; 
 
     Map<CheckpointType, int[]> pointDistributionMap = new HashMap<>();
-pointDistributionMap.put(CheckpointType.HC, new int[]{50, 30, 20, 15}); // ADD AND FIX
+pointDistributionMap.put(CheckpointType.HC, new int[]{20, 15, 12, 10, 8, 6, 4, 2}); // ADD AND FIX
+pointDistributionMap.put(CheckpointType.C1, new int[]{10, 8, 6, 4, 2, 1}); 
+pointDistributionMap.put(CheckpointType.C2, new int[]{5, 3, 2, 1}); 
+pointDistributionMap.put(CheckpointType.C3, new int[]{2, 1}); 
+pointDistributionMap.put(CheckpointType.C4, new int[]{1}); 
 
+    // Gets a list of indexes of valid checkpoints in all stage checkpoints, also stores correct checkpoints
+    ArrayList<Integer> indexes = new ArrayList<Integer>();
+	ArrayList<Checkpoint> mountainCheckpoints = new ArrayList<Checkpoint>();
+	for (int i = 0; i < checkpoints.length; i++){
+		checkpointType = checkpointHash.get(i).getType(); // checkpointHash? 
+		if (checkpointType != CheckpointType.SPRINT){
+			mountainCheckpoints.add(checkpoint);
+			indexes.add(i);
+		}
+	}
 
-    for (int i = 0; i < checkpoints.size(); i++) {
-Checkpoint checkpoint = checkpoints.get(i);
+	if (mountainCheckpoints.size() != 0){
+		// find all riders that did the stage
+		riderList = getRidersInStage(stageId);
+	}
 
-// Check if the checkpoint is a mountain checkpoint
-if (checkpoint.getType() != CheckpointType.SPRINT) {
-    int[] pointDistribution = pointDistributionMap.get(checkpoint.getType());
+	// Loop thru all M-CP
+	for (Checkpoint mountainCheckpoint : mountainCheckpoints) {
+		boolean swapFlag = true;
+		// Sort Riders Times for that specific checkpoint
+		outside:
+			for (int i = 1; i < riderList.size(); i++){
+				// stopping sort if no swaps made last pass
+				if (!swapFlag){
+					break outside;
+				}
 
-    // Sort riders based on their checkpoint times
-    
+				// resseting flag
+				swapFlag = false;
 
-    // Assign points based on rider positions and point distribution
-    // for (int j = 0; j < riders.size(); j++) {
-    //     int points = (j < pointDistribution.length) ? pointDistribution[j] : 0;
-    //     mountainPoints[j] += points;
-    // }
-}
+				// bubble sort pass
+				for (int j = 0; j < riderList.size() - i; j++){
+					// comparing times of current item and item ahead
+					LocalTime t1 = riderList.get(j).getCheckpointTime(stageId, indexes.get(i));
+					LocalTime t2 = riderList.get(j + 1).getCheckpointTime(stageId, indexes.get(i));
+					if (t1.isAfter(t2)){
+						// swapping items
+						Rider temp = riderList.get(j + 1);
+						riderList.set(j + 1, riderList.get(j));
+						riderList.set(j, temp);
 
+						swapFlag = true;
+					}
+				}
+			}
+		// Assign Points
+		int[] pointsList = pointDistributionMap.get(mountainCheckpoint.getType());
 
-return mountainPoints;
+		for (int i = 0; i < riderList.size(); i++) {
+			if (pointsList.length > i && pointsList[i] != 0) {
+			riderList.get(i).addMountainPoints(stageId, pointsList[i]);
+		    } else {
+			riderList.get(i).addMountainPoints(stageId, 0);
+		    }
+		}
+
+	} 
+	// Order of riders we need to return
+	ranksInStage = getRidersRankInStage(stageId);
+	int [] output = new int[ranksInStage.size()];
+
+	// For each rider in order of gRRIS
+	for (int i = 0; i < ranksInStage.size(); i++){
+		int id = ranksInStage.get(i);
+		Rider rider = riderHash.get(id);
+		points = rider.getMountainPoints();
+		output[i] = points;
+	}
+
+return output;
 }
