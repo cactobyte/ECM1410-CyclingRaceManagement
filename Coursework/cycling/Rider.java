@@ -24,8 +24,11 @@ public class Rider{
 	public void addMountainPoints(int stageId, int points){
 		mountainPoints.put(stageId, points + mountainPoints.get(stageId));
 	}
+	
+	public int getSprintPoints(int stageId){
+		return sprintPoints.get(stageId);
+	}
 
-	// Other
 	public void addSprintPoints(int stageId, int points){
 		sprintPoints.put(stageId, points + sprintPoints.get(stageId));
 	}
