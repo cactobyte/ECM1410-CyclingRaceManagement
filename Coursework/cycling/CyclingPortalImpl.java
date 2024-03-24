@@ -1507,8 +1507,43 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 	@Override
 	public int[] getRidersMountainPointClassificationRank(int raceId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
+		if (!raceHash.containsKey(raceId)){
+			throw new IDNotRecognisedException("Race ID not in system");
+		}
+
+		int [] raceStages = getRaceStages(raceId);
+
+		Map<Rider, Integer> totalMountainPoints = new HashMap<Rider, Integer>();
+
+		for (int stageId : raceStages){
+			Stage stage = stageHash.get(stageId);
+			riderList = getRidersInStage(stageId);
+			for (Rider rider : riderList){
+				int points = rider.getMountainPoints(stageId);
+				totalMountainPoints.put(rider, totalMountainPoints.getOrDefault(rider, 0) + points);
+			}
+		}
+
+		// sort totalMountainpoints, got this thing from StackOverflow... ummm...
+		List<Map.Entry<Rider, Integer>> entries = new ArrayList<>(totalMountainPoints.entrySet());
+		entries.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+		// retrieve id and create list of riders by their id from the sorted tMP list
+		int [] rankedRiders = new int[entries.size()];
+		for (int i = 0; i < entries.size(); i++){
+			Rider rider = entries.get(i).getKey();
+			// I dont think I can get the key (Rider ID) from the value (Rider Object) without looping thru the riderHash 
+			// pls edit if u find a way i think my brain stopped working
+			for (Integer riderId : riderHash.keySet()){
+				if (riderHash.get(riderId) == rider){
+					rankedRiders[i] = riderId;
+					break;
+				}
+			}
+
+		}  
+
+		return rankedRiders;
 	}
 
 	public void assignSprintPoints(int stageId, int[] rankArr, int[] points){
