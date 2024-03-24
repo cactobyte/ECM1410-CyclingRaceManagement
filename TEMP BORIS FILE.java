@@ -14,6 +14,31 @@
 */
 
 @Override
+public LocalTime[] getGeneralClassificationTimesInRace(int raceId) throws IDNotRecognisedException {
+	if (!raceHash.containsKey(raceId)){
+		throw new IDNotRecognisedException("Race ID not in system");
+	}
+
+	Map<Integer, LocalTime> riderTotalTimeMap = new HashMap<>(); // uhhh
+
+	int[] raceStages = getRaceStages(raceId); 
+
+	for (int stageId : raceStages){
+		ArrayList<Rider> riderList = getRidersInStage(stageId);
+		for (Rider rider : riderList){
+			LocalTime[] stageResults = rider.getStageResult(stageId);
+			if (stageResults.length > 0){
+				riderTotalTimeMap.put() // hello finn help here basically need to put the time into the list? idfk, somehow sum up the time
+				
+			}
+		}
+	}
+
+
+	return null;
+}
+
+@Override
 public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
 	if (!stageHash.containsKey(stageId)){
 		throw new IDNotRecognisedException("Stage ID not in system");
