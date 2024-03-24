@@ -1453,10 +1453,10 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 			for (int i = 0; i < riderList.size(); i++) {
 				if (pointsList.length > i && pointsList[i] != 0) {
-			        riderList.get(i).addMountainPoints(stageId, pointsList[i]);
-			    } else {
-			    	riderList.get(i).addMountainPoints(stageId, 0);
-			    }
+			        	riderList.get(i).addMountainPoints(stageId, pointsList[i]);
+			    	} else {
+			    		riderList.get(i).addMountainPoints(stageId, 0);
+			    	}
 			}
 
 		} 
@@ -1497,9 +1497,9 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		for (int i = 0; i < rankedListOfIds.length; i++){
 			int riderId = rankedListOfIds[i];
-		    Rider rider = riderHash.get(riderId);
-		    int riderMountainPoints = mountainPoints.getOrDefault(rider, 0);
-		    output[i] = riderMountainPoints;
+			Rider rider = riderHash.get(riderId);
+			int riderMountainPoints = mountainPoints.getOrDefault(rider, 0);
+			output[i] = riderMountainPoints;
 		}
         
 		return output;
