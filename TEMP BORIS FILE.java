@@ -14,28 +14,33 @@
 */
 
 @Override
-public LocalTime[] getGeneralClassificationTimesInRace(int raceId) throws IDNotRecognisedException {
+public int[] getRidersMountainPointsInRace(int raceId) throws IDNotRecognisedException {
 	if (!raceHash.containsKey(raceId)){
 		throw new IDNotRecognisedException("Race ID not in system");
 	}
 
-	Map<Integer, LocalTime> riderTotalTimeMap = new HashMap<>(); // uhhh
-
-	int[] raceStages = getRaceStages(raceId); 
+	int [] raceStages = getRaceStages(raceId); // returns list of ids
+	Map<Rider, Integer> mountainPoints = new HashMap<>();
 
 	for (int stageId : raceStages){
-		ArrayList<Rider> riderList = getRidersInStage(stageId);
-		for (Rider rider : riderList){
-			LocalTime[] stageResults = rider.getStageResult(stageId);
-			if (stageResults.length > 0){
-				riderTotalTimeMap.put() // hello finn help here basically need to put the time into the list? idfk, somehow sum up the time
-				
-			}
+		Stage stage = stageHash.get(stageId);
+		for (Rider rider : stage.getRidersInStage(stageId)){
+			int points = rider.getMountainPoints(stageId);
+			mountainPoints.put(rider, mountainPoints.getOrDefault(rider, 0) + points)
 		}
 	}
+	
+	rankedListOfIds = getRidersGeneralClassificationRank(raceId); // name is hella scuffed
+	int [] output = new int[rankedListOfIds.length];
 
+	for (int i = 0; i < rankedListOfIds.length; i++){
+		int riderId = rankedListOfIds[i];
+	    Rider rider = riderHash.get(riderId);
+	    int riderMountainPoints = mountainPoints.getOrDefault(rider, 0);
+	    output[i] = riderMountainPoints;
+	}
 
-	return null;
+	return output;
 }
 
 @Override
