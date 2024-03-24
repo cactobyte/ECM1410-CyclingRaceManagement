@@ -17,6 +17,14 @@ public class Rider{
 		return teamID;
 	}
 
+	public int getMountainPoints(int stageId){
+		return mountainPoints.getOrDefault(stageId, 0);
+	}
+
+	public void addMountainPoints(int stageId, int points){
+		mountainPoints.put(stageId, points + mountainPoints.get(stageId));
+	}
+
 	// Other
 	public void addSprintPoints(int stageId, int points){
 		sprintPoints.put(stageId, points + sprintPoints.get(stageId));
