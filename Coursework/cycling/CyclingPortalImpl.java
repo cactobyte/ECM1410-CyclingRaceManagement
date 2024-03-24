@@ -24,6 +24,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 	private HashMap<Integer, Stage> stageHash = new HashMap<Integer, Stage>();
 	private HashMap<Integer, Checkpoint> checkpointHash = new HashMap<Integer, Checkpoint>();
 
+	// done
 	@Override
 	public int createTeam(String name, String description) throws IllegalNameException, InvalidNameException {
 		// IllegalNameException
@@ -75,6 +76,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		teamHash.remove(teamId);
 	}
 
+	// done
 	@Override
 	public int[] getTeams(){
 		Set<Integer> IDSet = teamHash.keySet();
@@ -89,6 +91,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return teamIDs;
 	}
 
+	// done
 	@Override
 	public int createRider(int teamID, String name, int yearOfBirth) throws IDNotRecognisedException, IllegalArgumentException{
 		// IDNotrecognisedException
@@ -128,6 +131,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		riderHash.remove(riderId);
 	}
 
+	// done
 	@Override
 	public int[] getTeamRiders(int teamId) throws IDNotRecognisedException{
 		// IDNotRecognisedException
@@ -151,6 +155,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return IDs;
 	}
 
+	// done
 	@Override
 	public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
 		// InvalidNameException
@@ -186,6 +191,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return Collections.max(raceHash.keySet());
 	}
 
+	// done
 	@Override
 	public int[] getRaceIds() {
 		int[] raceId = new int[raceHash.size()];
@@ -209,6 +215,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		raceHash.remove(raceId);
 	}
 
+	// done
 	@Override
 	public int addStageToRace(int raceId, String stageName, String description,
 		double length, LocalDateTime startTime, StageType type)
@@ -256,6 +263,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return Collections.max(stageHash.keySet()); 
 	}
 
+	// done
 	@Override
 	public int[] getRaceStages(int raceId) throws IDNotRecognisedException{
 		// IDNotRecognisedException
@@ -311,6 +319,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return Ids;
 	}
 
+	// done
 	@Override
 	public double getStageLength(int stageId) throws IDNotRecognisedException{
 		// IDNotRecognised
@@ -322,6 +331,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return stageHash.get(stageId).getLength();
 	}
 
+	// done
 	@Override
 	public int getNumberOfStages(int raceId) throws IDNotRecognisedException{
 		// IDNotRecognised
@@ -353,6 +363,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		stageHash.remove(stageId);
 	}
 
+	// done
 	@Override
 	public int addCategorizedClimbToStage(int stageId, Double location, CheckpointType type,
 	Double averageGradient, Double length) throws IDNotRecognisedException,
@@ -393,6 +404,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return Collections.max(checkpointHash.keySet());
 	}
 
+	// done
 	@Override
 	public int addIntermediateSprintToStage(int stageId, double location)
 	throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
@@ -452,6 +464,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		checkpointHash.remove(checkpointId);
 	}
 
+	// done
 	@Override
 	public void concludeStagePreparation(int stageId)
 	throws IDNotRecognisedException, InvalidStageStateException{
@@ -470,6 +483,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		stageHash.get(stageId).concludeStage();
 	}
 
+	// done
 	@Override
 	public int[] getStageCheckpoints(int stageId) throws IDNotRecognisedException{
 		// IDNotRecognisedException
@@ -526,6 +540,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return Ids;
 	}
 
+	// done
 	@Override
 	public String viewRaceDetails(int raceId) throws IDNotRecognisedException{
 		// IDNotRecognised
@@ -551,6 +566,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return output;
 	}
 
+	// done
 	@Override
 	public void registerRiderResultsInStage(int stageId, int riderId, LocalTime... checkpoints)
 		throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointTimesException, InvalidStageStateException {
@@ -592,6 +608,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		rider.addStageResult(stageId, checkpoints);
 	}
 
+	// done
 	@Override
 	public LocalTime[] getRiderResultsInStage(int stageId, int riderId) throws IDNotRecognisedException {
 		// IDNotRecognised
@@ -621,7 +638,6 @@ public class CyclingPortalImpl implements CyclingPortal {
 		// method logic
 		Rider rider = riderHash.get(riderId);
 		rider.deleteStageResults(stageId);
-
 	}
 
 	@Override
@@ -643,7 +659,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		raceHash.remove(raceId);
 	}
 
-	// TODO TT stuff
+	// done
 	@Override
 	public LocalTime getRiderAdjustedElapsedTimeInStage(int stageId, int riderId) throws IDNotRecognisedException {
 		// IDNotRecognised
@@ -656,67 +672,133 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 		// get all riders in a stage
 		ArrayList<Rider> riderList = new ArrayList<Rider>();
-		for (Map.Entry<Integer, Rider> entry : riderHash.entrySet()){
-			if (entry.getValue().hasResults(stageId)){
-				riderList.add(entry.getValue());
-			}
-		}
+		riderList = getRidersInStage(stageId);
 
-		// bubblesort first to last based on thier time
-		boolean swapFlag = true;
-		outside:
-			for (int i = 1; i < riderList.size(); i++){
-				// stopping sort if no swaps made last pass
-				if (!swapFlag){
-					break outside;
-				}
+		// edge case TT stage
+		if (stageHash.get(stageId).getType() == StageType.TT){
+			// bubblesort first to last based on thier time
+			boolean swapFlag = true;
+			outside:
+				for (int i = 1; i < riderList.size(); i++){
+					// stopping sort if no swaps made last pass
+					if (!swapFlag){
+						break outside;
+					}
 
-				// resseting flag
-				swapFlag = false;
+					// resseting flag
+					swapFlag = false;
 
-				// bubble sort pass
-				for (int j = 0; j < riderList.size() - i; j++){
-					// comparing times of current item and item ahead
-					if (riderList.get(j).getFinalStageTime(stageId).isAfter(riderList.get(j + 1).getFinalStageTime(stageId))){
-						// swapping items
-						Rider temp = riderList.get(j + 1);
-						riderList.set(j + 1, riderList.get(j));
-						riderList.set(j, temp);
+					// bubble sort pass
+					for (int j = 0; j < riderList.size() - i; j++){
+						// comparing times of current item and item ahead
+						// rider 1 time
+						LocalTime finishTime = riderList.get(j).getFinalStageTime(stageId);
+						LocalTime startTime= riderList.get(j).getCheckpointTime(stageId, 0);
+						LocalTime t1 = calcTimeTrialTime(startTime, finishTime);
 
-						swapFlag = true;
+						// rider 2 time
+						finishTime = riderList.get(j + 1).getFinalStageTime(stageId);
+						startTime = riderList.get(j + 1).getCheckpointTime(stageId, 0);
+						LocalTime t2 = calcTimeTrialTime(startTime, finishTime);
+
+						if (t1.isAfter(t2)){
+							// swapping items
+							Rider temp = riderList.get(j + 1);
+							riderList.set(j + 1, riderList.get(j));
+							riderList.set(j, temp);
+
+							swapFlag = true;
+						}
 					}
 				}
-			}
 
-
-		// calculate specific adjusted time for rider requested
-		// finding the specific rider
-		int riderIndex = 0;
-		Rider rider = riderHash.get(riderId);
-		for (int i = 0; i < riderList.size(); i++){
-			if (riderList.get(i) == rider){
-				riderIndex = i;
-			}
-		}
-
-		// checking if rider ahead has time within one second
-		LocalTime currentTime = riderHash.get(riderId).getFinalStageTime(stageId);
-		withinOne:
-			for(int i = riderIndex; i > 0; i--){
-				LocalTime timeOne = riderList.get(i).getFinalStageTime(stageId);
-				LocalTime timeTwo = riderList.get(i - 1).getFinalStageTime(stageId);
-				long difference = ChronoUnit.SECONDS.between(timeOne, timeTwo);
-				if (difference < 1){
-					currentTime = timeTwo;
-				} else{
-					break withinOne;
+			// getting the requested riderIndex in sorted list
+			int riderIndex = 0;
+			Rider rider = riderHash.get(riderId);
+			for (int i = 0; i < riderList.size(); i++){
+				if (riderList.get(i) == rider){
+					riderIndex = i;
 				}
 			}
+
+			// finding the adjusted time of specific rider
+			LocalTime finishTime = riderList.get(riderIndex).getFinalStageTime(stageId);
+			LocalTime startTime = riderList.get(riderIndex).getCheckpointTime(stageId, 0);
+			LocalTime currentTime = calcTimeTrialTime(startTime, finishTime);
+			withinOne:
+				for(int i = riderIndex; i > 0; i--){
+					// comparing times of current item and item before
+					finishTime = riderList.get(j).getFinalStageTime(stageId);
+					startTime = riderList.get(j).getCheckpointTime(stageId, 0);
+					long t1 = ChronoUnit.SECONDS.between(startTime, finishTime);
+
+					finishTime = riderList.get(j - 1).getFinalStageTime(stageId);
+					startTime = riderList.get(j - 1).getCheckpointTime(stageId, 0);
+					long t2 = ChronoUnit.SECONDS.between(startTime, finishTime);
+
+					double difference = t1 - t2;
+					if (difference < 1){
+						currentTime = calcTimeTrialTime(startTime, finishTime)
+					} else{
+						break withinOne;
+					}
+				}
+		} else{
+			// bubblesort first to last based on thier time
+			boolean swapFlag = true;
+			outside:
+				for (int i = 1; i < riderList.size(); i++){
+					// stopping sort if no swaps made last pass
+					if (!swapFlag){
+						break outside;
+					}
+
+					// resseting flag
+					swapFlag = false;
+
+					// bubble sort pass
+					for (int j = 0; j < riderList.size() - i; j++){
+						// comparing times of current item and item ahead
+						if (riderList.get(j).getFinalStageTime(stageId).isAfter(riderList.get(j + 1).getFinalStageTime(stageId))){
+							// swapping items
+							Rider temp = riderList.get(j + 1);
+							riderList.set(j + 1, riderList.get(j));
+							riderList.set(j, temp);
+
+							swapFlag = true;
+						}
+					}
+				}
+
+			// calculate specific adjusted time for rider requested
+			// finding the specific rider
+			int riderIndex = 0;
+			Rider rider = riderHash.get(riderId);
+			for (int i = 0; i < riderList.size(); i++){
+				if (riderList.get(i) == rider){
+					riderIndex = i;
+				}
+			}
+
+			// checking if rider ahead has time within one second
+			LocalTime currentTime = riderHash.get(riderId).getFinalStageTime(stageId);
+			withinOne:
+				for(int i = riderIndex; i > 0; i--){
+					LocalTime timeOne = riderList.get(i).getFinalStageTime(stageId);
+					LocalTime timeTwo = riderList.get(i - 1).getFinalStageTime(stageId);
+					long difference = ChronoUnit.SECONDS.between(timeOne, timeTwo);
+					if (difference < 1){
+						currentTime = timeTwo;
+					} else{
+						break withinOne;
+					}
+				}
+		}
 
 		return currentTime;
 	}
 
-	// TODO TT stuff
+	// done
 	@Override
 	public int[] getRidersRankInStage(int stageId) throws IDNotRecognisedException {
 		// IDNotRecognised
@@ -725,8 +807,48 @@ public class CyclingPortalImpl implements CyclingPortal {
 		}
 
 		ArrayList<Rider> riderList = new ArrayList<Rider>();
-		riderList = getRidersInStage(stageId, riderList);
-		riderList = bubbleSortRiderList(riderList);
+		riderList = getRidersInStage(stageId);
+
+		// edge case TT stage
+		if (stageHash.get(stageId).getType() == StageType.TT){
+			// bubblesort first to last based on thier time
+			boolean swapFlag = true;
+			outside:
+				for (int i = 1; i < riderList.size(); i++){
+					// stopping sort if no swaps made last pass
+					if (!swapFlag){
+						break outside;
+					}
+
+					// resseting flag
+					swapFlag = false;
+
+					// bubble sort pass
+					for (int j = 0; j < riderList.size() - i; j++){
+						// comparing times of current item and item ahead
+						// rider 1 time
+						LocalTime finishTime = riderList.get(j).getFinalStageTime(stageId);
+						LocalTime startTime= riderList.get(j).getCheckpointTime(stageId, 0);
+						LocalTime t1 = calcTimeTrialTime(startTime, finishTime);
+
+						// rider 2 time
+						finishTime = riderList.get(j + 1).getFinalStageTime(stageId);
+						startTime = riderList.get(j + 1).getCheckpointTime(stageId, 0);
+						LocalTime t2 = calcTimeTrialTime(startTime, finishTime);
+
+						if (t1.isAfter(t2)){
+							// swapping items
+							Rider temp = riderList.get(j + 1);
+							riderList.set(j + 1, riderList.get(j));
+							riderList.set(j, temp);
+
+							swapFlag = true;
+						}
+					}
+				}
+		} else{
+			riderList = bubbleSortRiderListOnFinalTime(stageId, riderList);			
+		}
 
 		// list of Ids based on sorted list
 		for (int i = 0; i < riderList.size(); i++){
@@ -737,11 +859,11 @@ public class CyclingPortalImpl implements CyclingPortal {
 			}
 		}
 
-		int[] IdArr = riderList.toArray(new int[riderList.size()]);
-		return IdArr;
+		int[] idArr = riderList.toArray(new int[riderList.size()]);
+		return idArr;
 	}
 
-	// TODO TT stuff
+	// done
 	@Override
 	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException{
 		// IDNotRecognised
@@ -749,9 +871,86 @@ public class CyclingPortalImpl implements CyclingPortal {
 			throw new IDNotRecognisedException("StageId does not exist");
 		}
 
+		// method logic
+		// creating list for riders
 		ArrayList<Rider> riderList = new ArrayList<Rider>();
-		riderList = getRidersInStage(stageId, riderList);
-		riderList = bubbleSortRiderList(riderList);
+		riderList = getRidersInStage(stageId);
+
+		// time trial stage edge case
+		if (stageHash.get(stageId).getType() == StageType.TT){
+			// sorting the riders
+			// bubblesort first to last based on thier time
+			boolean swapFlag = true;
+			outside:
+				for (int i = 1; i < riderList.size(); i++){
+					// stopping sort if no swaps made last pass
+					if (!swapFlag){
+						break outside;
+					}
+
+					// resseting flag
+					swapFlag = false;
+
+					// bubble sort pass
+					for (int j = 0; j < riderList.size() - i; j++){
+						// comparing times of current item and item ahead
+						// rider 1 time
+						LocalTime finishTime = riderList.get(j).getFinalStageTime(stageId);
+						LocalTime startTime= riderList.get(j).getCheckpointTime(stageId, 0);
+						LocalTime t1 = calcTimeTrialTime(startTime, finishTime);
+
+						// rider 2 time
+						finishTime = riderList.get(j + 1).getFinalStageTime(stageId);
+						startTime = riderList.get(j + 1).getCheckpointTime(stageId, 0);
+						LocalTime t2 = calcTimeTrialTime(startTime, finishTime);
+
+						if (t1.isAfter(t2)){
+							// swapping items
+							Rider temp = riderList.get(j + 1);
+							riderList.set(j + 1, riderList.get(j));
+							riderList.set(j, temp);
+
+							swapFlag = true;
+						}
+					}
+				}
+
+			// create a list of the times
+			ArrayList<LocalTime> timeList = new ArrayList<LocalTime>();
+			for (Rider rider : riderList){
+				LocalTime startTime = rider.getCheckpointTime(stageId, 0);
+				LocalTime finishTime = rider.getFinalStageTime(stageId);
+				timeList.add(calcTimeTrial(startTime, finishTime));
+			}
+
+			// change times to adjusted times
+			int streak = 0;
+			for(int i = timeList.size() - 1; i > 0; i--){
+				t1 = timeList.get(i);
+				t2 = timeList.get(i - 1);
+				
+				long difference = ChronoUnit.SECONDS.between(t1, t2);
+				if (difference < 1){
+					timeList.set(i, t2)
+
+					// streak
+					for (int j = streak; j > 0; j--){
+						timeList.set(i + j, t2);
+					}
+
+					streak++;
+				} else{
+					streak = 0;
+				}
+			}
+			
+			// return array of times
+			LocalTime[] timeArr = timeList.toArray(new LocalTime[timeList.size()]);
+			return timeArr;
+		}
+
+		// Other stages
+		riderList = bubbleSortRiderListOnFinalTime(stageId, riderList);
 
 		// create a list of times based on sorted rider list
 		ArrayList<LocalTime> timeList = new ArrayList<LocalTime>();
@@ -780,10 +979,12 @@ public class CyclingPortalImpl implements CyclingPortal {
 			}
 		}
 
+		// return array of times
 		LocalTime[] timeArr = timeList.toArray(new LocalTime[timeList.size()]);
 		return timeArr;
 	}
 
+	// done
 	@Override
 	public int[] getRidersPointsInStage(int stageId) throws IDNotRecognisedException {
 		// IDNotRecognised
@@ -791,6 +992,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 			throw new IDNotRecognisedException("Stage Id does not exist");
 		}
 
+		// Method logic
 		// get ranks of rider who competed in stage
 		rankArr = getRidersRankInStage();
 
@@ -816,9 +1018,10 @@ public class CyclingPortalImpl implements CyclingPortal {
 			assignSprintPoints(stageId, rankArr, points);
 		}
 
-	 	// time trial TODO
+	 	// time trial
 	 	if (stageType == StageType.TT){
 	 		int[] points = {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
+	 		assignSprintPoints(stageId, rankArr, points);
 	 	}
 
 		// calc points for intermediate sprints
@@ -843,7 +1046,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		}
 
 		// looping through each sprint to add points
-		for (int i = 0; i < sprintCheckpoints.size(); i++){
+		for (int z = 0; z < sprintCheckpoints.size(); z++){
 			// sort them based on their time
 			// bubblesort first to last based on thier time
 			boolean swapFlag = true;
@@ -875,14 +1078,49 @@ public class CyclingPortalImpl implements CyclingPortal {
 
 			// adding points to riders
 			int[] points = {20, 17, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
-			for (int i = 0; i < 15; i++){
-				riderList.get(i).addSprintPoints(stageId, points[i]);
-			}
+			Rider[] riderArr = riderList.toArray(new Rider[riderList.size()]);
+			assignSprintPoints(stageId, riderList, points)
 		}
+
+		// make output list of points from all riders
+		ArrayList<Integer> pointsList = new ArrayList<Integer>();
+		for (int i = 0; i < rankArr.length(); i++){
+			int riderPoints = riderHash.get(rankArr[i]).getSprintPoints(stageId);
+			pointsList.add(riderPoints);
+		}
+
+		int[] output = pointsList.toArray(new int[list.size()]);
+		return output;
 	}
 
 	@Override
-	public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
+	public int[] getRidersPointsInRace(int raceId) throws IDNotRecognisedException {
+		// // IDNotRecognised
+		// if (!raceHash.containsKey(raceId)){
+		// 	throw new IDNotRecognisedException("Race ID does not exist");
+		// }
+
+		// // method logic
+		// // get all stages in the race
+		// int[] raceStages = getRaceStages(raceId);
+		// for (int i = 0; i < raceStages.length; i++){
+		// 	// calc points for every stage
+		// 	getRidersPointsInStage(raceStages[i]);
+		// }
+
+		// making a list of all riders that competed in all stages
+		// calculate total time for each rider
+			// loop through each stage add time to total
+				// store totalTime in rider
+		// order them based on total time
+		// 
+
+
+		return null;
+	}
+
+	@Override
+	public int[] getRidersPointClassificationRank(int raceId) throws IDNotRecognisedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -890,35 +1128,20 @@ public class CyclingPortalImpl implements CyclingPortal {
 	@Override
 	public void eraseCyclingPortal() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void saveCyclingPortal(String filename) throws IOException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void loadCyclingPortal(String filename) throws IOException, ClassNotFoundException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public LocalTime[] getGeneralClassificationTimesInRace(int raceId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int[] getRidersPointsInRace(int raceId) throws IDNotRecognisedException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int[] getRidersMountainPointsInRace(int raceId) throws IDNotRecognisedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -930,7 +1153,13 @@ public class CyclingPortalImpl implements CyclingPortal {
 	}
 
 	@Override
-	public int[] getRidersPointClassificationRank(int raceId) throws IDNotRecognisedException {
+	public int[] getRidersMountainPointsInStage(int stageId) throws IDNotRecognisedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int[] getRidersMountainPointsInRace(int raceId) throws IDNotRecognisedException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -949,7 +1178,7 @@ public class CyclingPortalImpl implements CyclingPortal {
 		}
 	}
 
-	public ArrayList<Rider> bubbleSortRiderList(ArrayList<Rider> riderList){
+	public ArrayList<Rider> bubbleSortRiderListOnFinalTime(int stageId, ArrayList<Rider> riderList){
 		// bubblesort first to last based on thier time
 		boolean swapFlag = true;
 		outside:
@@ -981,7 +1210,9 @@ public class CyclingPortalImpl implements CyclingPortal {
 		return riderList;
 	}
 
-	public ArrayList<Rider> getRidersInStage(int stageId, ArrayList<Rider> riderList){
+	// done
+	public ArrayList<Rider> getRidersInStage(int stageId){
+		ArrayList<Rider> riderList = new ArrayList<Rider>();
 		for (Map.Entry<Integer, Rider> entry : riderHash.entrySet()){
 			if (entry.getValue().hasResults(stageId)){
 				riderList.add(entry.getValue());
@@ -989,5 +1220,24 @@ public class CyclingPortalImpl implements CyclingPortal {
 		}
 
 		return riderList;
+	}
+
+	// done
+	public LocalTime calcTimeTrialTime(LocalTime startTime, LocalTime FinishTime){
+		String finishString = finishTime.toString();
+		String startString = startTime.toString();
+
+		String[] finishArr = new String[3];
+		finishArr = finishString.split(":");
+		String[] startArr = new String[3];
+		startArr = startString.split(":");
+
+		int hours = Integer.valueOf(finishArr[0]) - Integer.valueOf(startArr[0]);
+		int minutes = Integer.valueOf(finishArr[1]) - Integer.valueOf(startArr[1]);
+		double seconds = Double.valueOf(finishArr[2]) - Double.valueOf(startArr[2]);
+		
+		String timeInput = String.valueOf(hours) + String.valueOf(minutes) + String.valueOf(seconds);
+		LocalTime output = LocalTime.parse(timeInput)
+		return output;
 	}
 }
